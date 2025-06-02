@@ -1,5 +1,5 @@
-import AdminPage from './AdminProduto';
-import AdminPedido from './StatusAdmin';
+// import AdminPage from './AdminProduto';
+// import AdminPedido from './StatusAdmin';
 
 export function Admin() {
   return (
@@ -7,9 +7,9 @@ export function Admin() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-800 text-white p-6">
       <h1 className="text-3xl font-bold mb-8">Painel Administrativo</h1>
       
-        <AdminPage />
+        {/* <AdminPage />
         <br />
-        <AdminPedido />
+        <AdminPedido /> */}
     </div>
     </section>
   );

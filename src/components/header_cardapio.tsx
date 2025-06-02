@@ -14,8 +14,6 @@ import {
   SheetTrigger,
 } from '../ui/sheet';
 import { Dialog, DialogContent, DialogTrigger } from '../components/dialog';
-import { useAuth0 } from '@auth0/auth0-react'; // Manter para o caso de querer usar Auth0 em paralelo ou transição
-import MobileNavLinks from './mobile-nav-links'; // Será ajustado ou precisará de props para o logout customizado
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 
@@ -32,8 +30,6 @@ export function Header() {
   const [isCustomAuthenticated, setIsCustomAuthenticated] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
 
-  const { loginWithRedirect: loginWithAuth0Redirect } = useAuth0(); // Renomeado para clareza, se ainda for usar
-  const auth0 = useAuth0(); // Para acessar user.name do Auth0 se necessário, ou logout do Auth0
 
   const [searchText, setSearchText] = useState('');
   const [selectedDishes, setSelectedDishes] = useState<MenuProps[]>([]);
@@ -290,7 +286,6 @@ export function Header() {
                            <p className="text-sm text-zinc-400">Faça login para ver seus pedidos e agilizar suas compras.</p>
                           <Button
                             onClick={() => navigate('/login')} // Alterado para navegar para /login
-                            variant="primary"
                             className="w-full bg-orange-600 font-semibold text-white hover:bg-orange-700"
                           >
                             Fazer Login ou Criar Conta
