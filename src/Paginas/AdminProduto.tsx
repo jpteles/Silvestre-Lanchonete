@@ -1,9 +1,6 @@
-// src/pages/AdminPage.tsx (ou onde estiver seu AdminPage.tsx)
+// src/pages/AdminPage.tsx
 import React, { useEffect, useState, FormEvent, ChangeEvent } from "react";
-import apiClient from "../services/api"; // Importe sua instância configurada
-// Funções utilitárias para pegar token e papel do usuário
-const getToken = (): string | null => localStorage.getItem("authToken");
-const getUserRole = (): string | null => localStorage.getItem("userRole");
+import apiClient from "../services/api";
 
 interface Produto {
   id: string;
@@ -28,20 +25,11 @@ const AdminPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const role = getUserRole();
-    if (role !== "Administrador") {
-      console.error("Acesso Negado: Apenas administradores.");
-      alert("Acesso negado. Esta página é apenas para administradores.");
-      // Redirecionar ou mostrar mensagem de acesso negado na UI
-      setProdutos([]);
-      return;
-    }
     carregarProdutos();
   }, []);
 
   const carregarProdutos = async () => {
     try {
-      // GET /products é público
       const response = await apiClient.get<Produto[]>("/products");
       setProdutos(response.data);
     } catch (err) {
@@ -62,23 +50,26 @@ const AdminPage: React.FC = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", price: "", category: "", available: true, image: null });
+    setFormData({
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      available: true,
+      image: null,
+    });
     setIsEditing(null);
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    if (fileInput) fileInput.value = ""; // Limpa o campo de arquivo
+    if (fileInput) fileInput.value = "";
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (getUserRole() !== "Administrador") {
-      alert("Apenas administradores podem realizar esta ação.");
-      return;
-    }
 
     const submissionData = new FormData();
     submissionData.append("name", formData.name);
     submissionData.append("description", formData.description);
-    submissionData.append("price", String(formData.price)); // Converter para string
+    submissionData.append("price", String(formData.price));
     submissionData.append("category", formData.category);
     submissionData.append("available", String(formData.available));
     if (formData.image) {
@@ -87,31 +78,24 @@ const AdminPage: React.FC = () => {
 
     try {
       if (isEditing) {
-        // PUT /products/{id} - Admin
         await apiClient.put(`/products/${isEditing.id}`, submissionData);
         alert("Produto atualizado com sucesso!");
       } else {
-        // POST /products - Admin
         await apiClient.post("/products", submissionData);
         alert("Produto cadastrado com sucesso!");
       }
       resetForm();
       carregarProdutos();
     } catch (err: any) {
-      console.error(`Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} produto:`, err);
-      const errorMsg = err.response?.data?.message || err.message || `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} produto.`;
+      console.error(`Erro ao ${isEditing ? "atualizar" : "cadastrar"} produto:`, err);
+      const errorMsg = err.response?.data?.message || err.message || `Erro ao ${isEditing ? "atualizar" : "cadastrar"} produto.`;
       alert(errorMsg);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (getUserRole() !== "Administrador") {
-      alert("Apenas administradores podem excluir produtos.");
-      return;
-    }
     if (window.confirm("Tem certeza que deseja excluir este produto?")) {
       try {
-        // DELETE /products/{id} - Admin
         await apiClient.delete(`/products/${id}`);
         alert("Produto excluído com sucesso!");
         carregarProdutos();
@@ -135,10 +119,6 @@ const AdminPage: React.FC = () => {
     });
   };
 
-  if (getUserRole() !== "Administrador") {
-    return <div className="p-6 bg-gray-900 min-h-screen text-white text-center">Acesso negado. Esta página é apenas para administradores.</div>;
-  }
-
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
       <h1 className="text-2xl font-bold mb-6">Administração de Produtos</h1>
@@ -154,18 +134,18 @@ const AdminPage: React.FC = () => {
           Disponível
         </label>
         <div className="sm:col-span-2 flex gap-2">
-            <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded flex-1">
-              {isEditing ? "Atualizar Produto" : "Adicionar Produto"}
+          <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded flex-1">
+            {isEditing ? "Atualizar Produto" : "Adicionar Produto"}
+          </button>
+          {isEditing && (
+            <button type="button" onClick={resetForm} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+              Cancelar Edição
             </button>
-            {isEditing && (
-                <button type="button" onClick={resetForm} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-                    Cancelar Edição
-                </button>
-            )}
+          )}
         </div>
       </form>
 
-      <table className="w-full text-sm border border-gray-700 bg-gray-800">
+      <table className="w-full text-sm border border-gray-700 bg-gray-800 text-center">
         <thead>
           <tr className="bg-gray-700">
             <th className="p-2">Imagem</th>
@@ -182,7 +162,7 @@ const AdminPage: React.FC = () => {
             <tr key={produto.id} className="border-t border-gray-600 hover:bg-gray-750">
               <td className="p-2">
                 {produto.imageUrl ? (
-                  <img src={produto.imageUrl} alt={produto.name} className="w-12 h-12 object-cover rounded" />
+                  <img src={produto.imageUrl} alt={produto.name} className="w-12 h-12 object-cover rounded mx-auto" />
                 ) : (
                   "-"
                 )}
@@ -192,7 +172,7 @@ const AdminPage: React.FC = () => {
                 {produto.available ? "Disponível" : "Indisponível"}
               </td>
               <td>{produto.description}</td>
-              <td>R$ {typeof produto.price === 'number' ? produto.price.toFixed(2) : 'N/A'}</td>
+              <td>R$ {typeof produto.price === "number" ? produto.price.toFixed(2) : "N/A"}</td>
               <td>{produto.category}</td>
               <td className="space-x-2">
                 <button onClick={() => handleEdit(produto)} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white text-xs">

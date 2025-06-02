@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContent";
 // Importar 'type' para tipos
-import type { RegisterRequestDTO } from "../contexts/AuthContent"; // Usando a interface definida e exportada no AuthContext
+import type { RegisterRequestDTO } from "../contexts/AuthContent";
 import { useNavigate } from "react-router-dom";
 
 const RegisterForm: React.FC = () => {
@@ -10,14 +10,17 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { register, isLoading } = useAuth();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      const userData: RegisterRequestDTO = { name, email, password }; //
+      const userData: RegisterRequestDTO = { name, email, password };
       await register(userData);
+      // Se o registro for bem-sucedido, você pode querer navegar o usuário
+      // para a página de login ou diretamente para a página principal.
+      // Ex: navigate('/login'); ou navigate('/');
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Erro desconhecido no registro."
@@ -26,7 +29,7 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
+    <div className="w-full max-w-md p-6 rounded-lg shadow-md">
       {error && <div className="text-red-500 mb-4">{error}</div>}
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -35,7 +38,8 @@ const RegisterForm: React.FC = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome completo"
-          className="w-full p-2 border rounded"
+          // Adicionada a classe text-black
+          className="w-full p-2 border rounded text-black"
           required
         />
         
@@ -44,7 +48,8 @@ const RegisterForm: React.FC = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          className="w-full p-2 border rounded"
+          // Adicionada a classe text-black
+          className="w-full p-2 border rounded text-black"
           required
         />
         
@@ -53,7 +58,8 @@ const RegisterForm: React.FC = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Senha"
-          className="w-full p-2 border rounded"
+          // Adicionada a classe text-black
+          className="w-full p-2 border rounded text-black"
           required
           minLength={6}
         />

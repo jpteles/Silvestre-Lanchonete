@@ -21,7 +21,7 @@ export function App() {
         <Route path="/menu" element={<Header />} /> 
         
         {/* Nova Rota para Administração de Produtos */}
-        <Route path="/admin" element={<Admin />} /> {/* Idealmente dentro de um layout admin ou protegida */}
+        <Route path="/admin" element={<Admin />} /> 
 
         <Route path="/forgot-password" element={<RedefinirSenha />} />
         <Route path="/verificar-codigo" element={<Autenticacao />} />
