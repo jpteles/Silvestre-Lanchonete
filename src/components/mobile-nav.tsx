@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const MobileNav = () => {
-  const { isAuthenticated, loginWithRedirect, user } = useAuth0()
+  const { isAuthenticated, user } = useAuth0()
 
 const navigate = useNavigate()
 

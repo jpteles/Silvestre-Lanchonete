@@ -1,41 +1,41 @@
-import { useEffect, useState } from 'react';
-import Logo from '/assets/Logo.png';
+// import { useEffect, useState } from 'react';
+// import Logo from '/assets/Logo.png';
 
-const statusEtapas = [
-  'Pedido em preparação',
-  'Pedido pronto',
-  'Pedido em rota de entrega',
-];
+// const statusEtapas = [
+//   'Pedido em preparação',
+//   'Pedido pronto',
+//   'Pedido em rota de entrega',
+// ];
 
-const PedidoStatus = () => {
-  const [statusAtual, setStatusAtual] = useState(0);
-  const [pedido, setPedido] = useState(null);
+// const PedidoStatus = () => {
+//   const [statusAtual, setStatusAtual] = useState(0);
+//   const [pedido, setPedido] = useState(null);
 
-  useEffect(() => {
-    const fetchStatus = async () => {
-      const data = {
-        numero: 11,
-        status: Math.floor(Math.random() * 3), // Simulação de status aleatório
-        nome: 'Pizza 25cm',
-        descricao:
-          'Broto 25cm, MassaTradicional, Borda região, Catupiry da Casa, Batata Crunch, Pepperoni',
-        valor: 28.0,
-      };
+//   useEffect(() => {
+//     const fetchStatus = async () => {
+//       const data = {
+//         numero: 11,
+//         status: Math.floor(Math.random() * 3), // Simulação de status aleatório
+//         nome: 'Pizza 25cm',
+//         descricao:
+//           'Broto 25cm, MassaTradicional, Borda região, Catupiry da Casa, Batata Crunch, Pepperoni',
+//         valor: 28.0,
+//       };
 
-      setPedido(data);
-      setStatusAtual(data.status);
-    };
+//       setPedido(data);
+//       setStatusAtual(data.status);
+//     };
 
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
-    return () => clearInterval(interval);
-  }, []);
+//     fetchStatus();
+//     const interval = setInterval(fetchStatus, 5000);
+//     return () => clearInterval(interval);
+//   }, []);
 
-  if (!pedido) return <div className="text-white p-4">Carregando pedido...</div>;
-
+//   if (!pedido) return <div className="text-white p-4">Carregando pedido...</div>;
+export function PedidoStatus() {
   return (
     <div className="bg-gray-900 text-white min-h-screen flex items-center justify-center px-4">
-      <div className="flex flex-col items-center space-y-6">
+      {/* <div className="flex flex-col items-center space-y-6">
         <div className="animate-fadeIn">
           <img className="h-16 lg:h-20" src={Logo} alt="Logo" />
         </div>
@@ -78,7 +78,7 @@ const PedidoStatus = () => {
             <p className="text-sm text-gray-400">{pedido.descricao}</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

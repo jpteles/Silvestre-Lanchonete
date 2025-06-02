@@ -12,7 +12,7 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export const OrderProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentOrder, setCurrentOrder] = useState<Order | null>(mockCurrentOrder);
-  const [orderHistory, setOrderHistory] = useState<Order[]>(mockOrderHistory);
+  const [orderHistory] = useState<Order[]>(mockOrderHistory);
 
   const refreshOrderStatus = () => {
     // In a real app, this would fetch the latest order status from an API
