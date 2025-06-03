@@ -8,7 +8,7 @@ export function Header() {
       <div className="w-50 flex items-end justify-end">
       </div>
 
-      <div>
+      <div className="mr-28">
         <MobileNav />
       </div>
     </div>

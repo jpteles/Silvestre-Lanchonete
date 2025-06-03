@@ -14,7 +14,7 @@ function App() {
           <p className="text-gray-400">
             Pronto para fazer seus pedidos de forma rápida e prática?
           </p>
-          <p className="text-gray-400 mb-8">Preencha os dados abaixo e comece agora mesmo!</p>
+          <p className="text-gray-400">Preencha os dados abaixo e comece agora mesmo!</p>
           
           <RegisterForm />
         </div>

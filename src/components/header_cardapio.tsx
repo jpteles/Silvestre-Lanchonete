@@ -2,8 +2,8 @@ import { CircleUserRound, Menu, Search, ShoppingBag, Trash, LogOut } from 'lucid
 import React, { useState, Fragment, useEffect, useCallback } from 'react'; // Adicionado React, useCallback
 import { NavLink } from './nav-link';
 import { Toaster, toast } from 'sonner';
-import { dishes } from './menu';
-import { Main } from './main';
+import { dishes } from './menu'; // Certifique-se de que este caminho está correto
+import { Main } from './main'; // Certifique-se de que este caminho está correto
 import { useNavigate, useLocation } from 'react-router-dom'; // Adicionado useLocation
 import {
   Sheet,
@@ -12,10 +12,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../ui/sheet';
-import { Dialog, DialogContent, DialogTrigger } from '../components/dialog';
-import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
+} from '../ui/sheet'; // Certifique-se de que este caminho está correto
+import { Dialog, DialogContent, DialogTrigger } from '../components/dialog'; // Certifique-se de que este caminho está correto
+import { Button } from '../ui/button'; // Certifique-se de que este caminho está correto
+import { Separator } from '../ui/separator'; // Certifique-se de que este caminho está correto
 
 interface MenuProps {
   nome: string;
@@ -29,7 +29,6 @@ export function Header() {
   // Estados para o sistema de login customizado
   const [isCustomAuthenticated, setIsCustomAuthenticated] = useState(false);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
-
 
   const [searchText, setSearchText] = useState('');
   const [selectedDishes, setSelectedDishes] = useState<MenuProps[]>([]);
@@ -83,12 +82,12 @@ export function Header() {
     const targetElement = document.getElementById(sectionId);
     if (targetElement) {
       const headerHeight =
-        document.querySelector('.header')?.getBoundingClientRect().height || 0;
+        document.querySelector('.header')?.getBoundingClientRect().height || 0; // Se você tiver uma classe 'header' no elemento header, senão ajuste
       let targetPosition =
         targetElement.getBoundingClientRect().top +
         window.scrollY -
         headerHeight;
-      targetPosition -= 140;
+      targetPosition -= 140; // Ajuste este valor conforme necessário
       window.scrollTo({
         top: targetPosition,
         behavior: 'smooth',
@@ -98,11 +97,11 @@ export function Header() {
 
   const addToBag = (dish: MenuProps) => {
     // Se você QUISER restringir a adição ao carrinho apenas para usuários logados (custom auth):
-    // if (!isCustomAuthenticated) {
-    //   toast.error('Faça login para adicionar itens à sacola.');
-    //   navigate('/login'); // Opcional: redirecionar para login
-    //   return;
-    // }
+    if (!isCustomAuthenticated) {
+      toast.error('Faça login para adicionar itens à sacola.');
+      navigate('/login'); // Opcional: redirecionar para login
+      return;
+    }
     setSelectedDishes((prevDishes) => [...prevDishes, dish]);
     setTotalPrice(
       (prevTotal) =>
@@ -134,7 +133,8 @@ export function Header() {
   return (
     <div>
       <Toaster position="top-right" richColors />
-      <div className="fixed z-10 flex w-full flex-col gap-3 border-b border-white/10 bg-zinc-900 px-4 md:px-8 lg:px-12 xl:px-16">
+      {/* Adicione a classe 'header' aqui se for usada em scrollToSection */}
+      <div className="header fixed z-10 flex w-full flex-col gap-3 border-b border-white/10 bg-zinc-900 px-4 md:px-8 lg:px-12 xl:px-16">
         <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
           <button
             onClick={handleNavigateHome}
@@ -262,17 +262,15 @@ export function Header() {
                   <SheetDescription asChild>
                     <div className="flex flex-col gap-4 pt-2">
                       {isCustomAuthenticated ? ( // Usa o estado de login customizado
-                        <div className="space-y-4">
-                          {/* Você pode adicionar links para "Meus Pedidos", "Meu Perfil" aqui se desejar */}
-                          <div className="text-sm text-zinc-300">Gerencie sua conta e pedidos.</div>
-                           <Button 
-                            onClick={handleCustomLogout} // Botão de Logout Customizado
-                            variant="ghost" 
-                            className="w-full justify-start gap-2 px-2 py-1.5 text-red-500 hover:bg-red-500/10 hover:text-red-400"
-                          >
-                            <LogOut className="size-4" />
-                            Sair
-                          </Button>
+                        <div className="space-y-4">                           
+                            <Button 
+                              onClick={handleCustomLogout} // Botão de Logout Customizado
+                              variant="ghost" 
+                              className="w-full justify-start gap-2 px-2 py-1.5 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+                            >
+                              <LogOut className="size-4" />
+                              Sair
+                            </Button>
                           {/* Se ainda quiser usar MobileNavLinks e ele tiver apenas o logout do Auth0, precisará adaptar MobileNavLinks
                               ou remover o logout de lá e usar este botão.
                           <MobileNavLinks
@@ -283,13 +281,13 @@ export function Header() {
                         </div>
                       ) : (
                         <div className="space-y-3">
-                           <p className="text-sm text-zinc-400">Faça login para ver seus pedidos e agilizar suas compras.</p>
-                          <Button
-                            onClick={() => navigate('/login')} // Alterado para navegar para /login
-                            className="w-full bg-orange-600 font-semibold text-white hover:bg-orange-700"
-                          >
-                            Fazer Login ou Criar Conta
-                          </Button>
+                            <p className="text-sm text-zinc-400">Faça login para ver seus pedidos e agilizar suas compras.</p>
+                            <Button
+                              onClick={() => navigate('/login')} // Alterado para navegar para /login
+                              className="w-full bg-orange-600 font-semibold text-white hover:bg-orange-700"
+                            >
+                              Fazer Login ou Criar Conta
+                            </Button>
                           {/* Opção de login com Auth0, se ainda quiser oferecer */}
                           {/* <Button
                             onClick={() => loginWithAuth0Redirect()}
@@ -316,7 +314,7 @@ export function Header() {
               className="w-full border-0 bg-transparent p-0 text-sm outline-none focus:ring-0"
               placeholder="Buscar no cardápio..."
             />
-          </div>
+        </div>
 
         <div className="flex items-center overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-800 lg:justify-center">
           <nav className="flex items-center space-x-3 px-2 md:gap-5 xl:gap-6 2xl:gap-8">
@@ -346,11 +344,9 @@ export function Header() {
       </div>
       <Main
         searchText={searchText}
-        addToBag={addToBag}
+        addToBag={addToBag} // Passando a função addToBag modificada para o Main (se necessário)
         selectedDishes={selectedDishes}
       />
-      <Button className="bg-black text-black"
-      onClick={() => navigate('/admin')} >......</Button>
     </div>
     
   );
