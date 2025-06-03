@@ -3,8 +3,9 @@ import { useAuth } from "../contexts/AuthContent";
 import type { RegisterRequestDTO } from "../contexts/AuthContent";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import SocialLoginButton from "./SocialLoginButton";
+import SocialLoginButton from "./SocialLoginButton"; // Certifique-se que o caminho está correto
 
+// URL base da sua API.
 const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app';
 
 const RegisterForm: React.FC = () => {
@@ -13,7 +14,7 @@ const RegisterForm: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { register, isLoading } = useAuth(); //
+  const { register, isLoading } = useAuth(); // isLoading do useAuth é para o cadastro tradicional
   const navigate = useNavigate();
 
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -23,10 +24,10 @@ const RegisterForm: React.FC = () => {
     setError(null);
     try {
       const userData: RegisterRequestDTO = { name, email, password };
-      await register(userData);
-      // MODIFICADO: Redireciona para /menu após cadastro bem-sucedido
-      navigate("/menu");
+      await register(userData); // A função register do AuthContext deve lidar com o login após cadastro
+      navigate("/menu"); // Redireciona para /menu após cadastro bem-sucedido
     } catch (err) {
+      // Trata o erro vindo do AuthContext (que já deve ter tratado o erro da API)
       setError(
         err instanceof Error ? err.message : "Erro desconhecido no registro."
       );
@@ -34,9 +35,11 @@ const RegisterForm: React.FC = () => {
   };
 
   const handleGoogleRegister = () => {
-    setError(null);
+    setError(null); // Limpa erros de formulário anteriores
     setIsGoogleLoading(true);
-    window.location.href = `${API_BASE_URL}/auth/login/google`;
+    // Redireciona para o endpoint do backend para INICIAR o CADASTRO com Google
+    window.location.href = `${API_BASE_URL}/auth/register/google`;
+    // Não é preciso setIsLoading(false) aqui, pois a página será redirecionada
   };
 
   return (
@@ -79,7 +82,7 @@ const RegisterForm: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-neutral-400"
+              className="absolute right-3 top-3 text-neutral-400" // Ajustado para alinhar melhor o ícone
               disabled={isLoading || isGoogleLoading}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -100,7 +103,7 @@ const RegisterForm: React.FC = () => {
           <button
             onClick={() => navigate("/login")}
             className="text-white font-semibold hover:underline"
-            disabled={isGoogleLoading}
+            disabled={isGoogleLoading} // Desabilita enquanto o login com Google carrega
           >
             Entrar
           </button>
@@ -115,6 +118,9 @@ const RegisterForm: React.FC = () => {
         <SocialLoginButton
             provider="google"
             onClick={handleGoogleRegister}
+            // Se desejar desabilitar o botão SocialLoginButton visualmente,
+            // você precisaria adicionar a prop `disabled` e lógica de estilo nele.
+            // Ex: disabled={isGoogleLoading}
         />
         {isGoogleLoading && (
             <p className="text-center text-orange-400 mt-2">Redirecionando para o Google...</p>
