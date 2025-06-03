@@ -1,45 +1,47 @@
+// src/components/RegisterForm.tsx
 import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContent";
-import type { RegisterRequestDTO } from "../contexts/AuthContent";
-import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import SocialLoginButton from "./SocialLoginButton"; // Certifique-se que o caminho está correto
+import { useAuth } from "../contexts/AuthContent"; //
+import type { RegisterRequestDTO } from "../contexts/AuthContent"; //
+import { useNavigate } from "react-router-dom"; //
+import { Eye, EyeOff } from "lucide-react"; //
+import SocialLoginButton from "./SocialLoginButton"; //
 
-// URL base da sua API.
-const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app';
+const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app'; //
 
 const RegisterForm: React.FC = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { register, isLoading } = useAuth(); // isLoading do useAuth é para o cadastro tradicional
-  const navigate = useNavigate();
+  const [name, setName] = useState(""); //
+  const [email, setEmail] = useState(""); //
+  const [password, setPassword] = useState(""); //
+  const [showPassword, setShowPassword] = useState(false); //
+  const [error, setError] = useState<string | null>(null); //
+  const { register, isLoading } = useAuth(); //isLoading é para o cadastro tradicional //
+  const navigate = useNavigate(); //
 
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false); //
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => { //
+    e.preventDefault(); //
+    setError(null); //
     try {
-      const userData: RegisterRequestDTO = { name, email, password };
-      await register(userData); // A função register do AuthContext deve lidar com o login após cadastro
-      navigate("/menu"); // Redireciona para /menu após cadastro bem-sucedido
+      const userData: RegisterRequestDTO = { name, email, password }; //
+      await register(userData); //
+      // Redireciona para /menu após cadastro bem-sucedido,
+      // assumindo que a função register() do AuthContext também loga o usuário.
+      navigate("/menu"); //
     } catch (err) {
-      // Trata o erro vindo do AuthContext (que já deve ter tratado o erro da API)
       setError(
-        err instanceof Error ? err.message : "Erro desconhecido no registro."
+        err instanceof Error ? err.message : "Erro desconhecido no registro." //
       );
     }
   };
 
-  const handleGoogleRegister = () => {
-    setError(null); // Limpa erros de formulário anteriores
-    setIsGoogleLoading(true);
-    // Redireciona para o endpoint do backend para INICIAR o CADASTRO com Google
-    window.location.href = `${API_BASE_URL}/auth/register/google`;
-    // Não é preciso setIsLoading(false) aqui, pois a página será redirecionada
+  const handleGoogleRegister = () => { //
+    setError(null); //
+    setIsGoogleLoading(true); //
+    // CORRIGIDO: Aponta para a rota de CADASTRO com Google do backend.
+    // Adicionado `?state=register` para que o LoginForm (no callback) possa, se necessário,
+    // chamar o endpoint `/auth/register/google/authorized` em vez de `/auth/login/google/authorized`.
+    window.location.href = `${API_BASE_URL}/auth/register/google?state=register`; //
   };
 
   return (
@@ -53,9 +55,9 @@ const RegisterForm: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nome completo"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
             required
-            disabled={isLoading || isGoogleLoading}
+            disabled={isLoading || isGoogleLoading} //
           />
 
           <input
@@ -63,71 +65,68 @@ const RegisterForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Endereço de e-mail"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
             required
-            disabled={isLoading || isGoogleLoading}
+            disabled={isLoading || isGoogleLoading} //
           />
 
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? "text" : "password"} //
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)} //
               placeholder="Senha"
-              className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
               required
-              minLength={6}
-              disabled={isLoading || isGoogleLoading}
+              minLength={6} //
+              disabled={isLoading || isGoogleLoading} //
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-neutral-400" // Ajustado para alinhar melhor o ícone
-              disabled={isLoading || isGoogleLoading}
+              onClick={() => setShowPassword(!showPassword)} //
+              className="absolute right-3 top-3 text-neutral-400" //
+              disabled={isLoading || isGoogleLoading} //
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />} 
             </button>
           </div>
 
           <button
             type="submit"
-            disabled={isLoading || isGoogleLoading}
-            className="w-full py-3 rounded bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:opacity-90 transition"
+            disabled={isLoading || isGoogleLoading} //
+            className="w-full py-3 rounded bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:opacity-90 transition" //
           >
-            {isLoading ? "Cadastrando..." : "Cadastre-se!"}
+            {isLoading ? "Cadastrando..." : "Cadastre-se!"} 
           </button>
         </form>
 
-        <div className="mt-4 text-center text-sm text-neutral-400">
+        <div className="mt-4 text-center text-sm text-neutral-400"> 
           Já tem uma conta?{" "}
           <button
-            onClick={() => navigate("/login")}
-            className="text-white font-semibold hover:underline"
-            disabled={isGoogleLoading} // Desabilita enquanto o login com Google carrega
+            onClick={() => navigate("/login")} //
+            className="text-white font-semibold hover:underline" //
+            disabled={isGoogleLoading} //
           >
             Entrar
           </button>
         </div>
 
-        <div className="flex items-center my-6">
-          <hr className="flex-grow border-neutral-700" />
-          <span className="mx-3 text-neutral-500 text-sm">ou</span>
-          <hr className="flex-grow border-neutral-700" />
+        <div className="flex items-center my-6"> 
+          <hr className="flex-grow border-neutral-700" /> 
+          <span className="mx-3 text-neutral-500 text-sm">ou</span> 
+          <hr className="flex-grow border-neutral-700" /> 
         </div>
 
         <SocialLoginButton
-            provider="google"
-            onClick={handleGoogleRegister}
-            // Se desejar desabilitar o botão SocialLoginButton visualmente,
-            // você precisaria adicionar a prop `disabled` e lógica de estilo nele.
-            // Ex: disabled={isGoogleLoading}
+            provider="google" //
+            onClick={handleGoogleRegister} //
         />
         {isGoogleLoading && (
-            <p className="text-center text-orange-400 mt-2">Redirecionando para o Google...</p>
+            <p className="text-center text-orange-400 mt-2">Redirecionando para o Google...</p> 
         )}
       </div>
     </div>
   );
 };
 
-export default RegisterForm;
+export default RegisterForm; //

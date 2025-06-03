@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Adicionado useCallback
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import SocialLoginButton from './SocialLoginButton'; // Certifique-se que o caminho está correto
+import { useNavigate, useLocation, Link } from 'react-router-dom'; // Adicionado useLocation
+import SocialLoginButton from './SocialLoginButton';
 
 const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app';
 
@@ -13,34 +13,20 @@ const LoginForm: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // Usar useLocation para obter search params de forma reativa
 
+  // Função para login tradicional (mantida como antes)
   const handleTraditionalLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-      // Assumindo que AuthContext.login faria algo similar ou que este é um login "local"
-      // que também precisa popular o localStorage para AuthContext e header_cardapio.
       const { name, token, refreshToken } = response.data;
-      
-      if (token) {
-          localStorage.setItem('authToken', token); // Para AuthContext
-          localStorage.setItem('token', token);     // Para compatibilidade com header_cardapio.tsx (se necessário)
-      }
-      if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-      }
-      if (name) {
-          localStorage.setItem('userName', name); // Para AuthContext
-          localStorage.setItem('name', name);       // Para compatibilidade com header_cardapio.tsx (se necessário)
-      }
-      
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      if (name) localStorage.setItem('name', name);
       console.log('Usuário autenticado com email/senha:', name);
-      // É importante que AuthContext também seja notificado para atualizar seu estado interno,
-      // ou que ele leia do localStorage na próxima renderização.
-      // Se AuthContext tiver uma função para setar o usuário após login manual, chame-a aqui.
       navigate('/menu');
     } catch (err: any) {
       console.error('Erro ao fazer login tradicional:', err);
@@ -54,31 +40,58 @@ const LoginForm: React.FC = () => {
     }
   };
 
+  // Função para iniciar o fluxo de autenticação com Google (mantida como antes)
   const handleGoogleLogin = () => {
     setError('');
     setIsLoading(true);
-    // Redireciona para o endpoint do backend para INICIAR o LOGIN com Google
-    // Adicionando 'state=login' para possível diferenciação no callback, se necessário.
-    window.location.href = `${API_BASE_URL}/auth/login/google?state=login`;
+    window.location.href = `${API_BASE_URL}/auth/login/google`;
   };
 
-  const validateAuthCode = useCallback(async (code: string, flowState?: string | null) => {
-    console.log('FRONTEND: Validando código do Google:', code, 'com estado:', flowState);
-    //setIsLoading(true); // Já é definido no useEffect antes de chamar esta função
+  // Função para processar o código de autorização retornado pelo Google
+  useEffect(() => {
+    console.log('LoginForm useEffect disparado. Pathname atual:', location.pathname, 'Search params:', location.search);
+    
+    const urlParams = new URLSearchParams(location.search); // Usar location.search do useLocation
+    const code = urlParams.get('code');
+    const errorParam = urlParams.get('error');
+    const errorDescription = urlParams.get('error_description');
 
-    // Lógica para determinar o endpoint de validação com base no flowState, se necessário:
-    let validationEndpoint = '/auth/login/google/authorized'; // Default para login
-    if (flowState === 'register') {
-      // Se o seu backend EXIGE um endpoint diferente para finalizar o registro com Google:
-      // validationEndpoint = '/auth/register/google/authorized';
-      // Caso contrário, se /auth/login/google/authorized lida com criação de usuário, mantenha-o.
-      console.log('Fluxo identificado como registro, mas usando endpoint de login/authorized por padrão.');
-      // Se você realmente tem /auth/register/google/authorized e precisa usá-lo:
-      // validationEndpoint = '/auth/register/google/authorized';
+    // Condição crucial: o componente DEVE estar na rota correta E o 'code' DEVE estar presente.
+    // Ajuste '/login' se sua rota de login/callback for diferente.
+    if (location.pathname.endsWith('/login') && code && !errorParam) {
+      console.log('Código do Google detectado na URL de login:', code);
+      // Verifica se já está carregando para evitar múltiplas chamadas se o componente remontar rapidamente
+      if (!isLoading) {
+        setIsLoading(true);
+        validateAuthCode(code);
+      }
+      // Limpa os parâmetros da URL para evitar reprocessamento e não mostrar o código na barra de endereço
+      // Faz isso após um pequeno delay para garantir que o processamento iniciou
+      setTimeout(() => {
+        window.history.replaceState({}, document.title, location.pathname);
+        console.log('Parâmetros da URL limpos.');
+      }, 100);
+    } else if (errorParam) {
+      console.error('Erro retornado pelo Google na URL:', errorParam, errorDescription);
+      setError(decodeURIComponent(errorDescription || 'Falha na autenticação com Google.'));
+      setIsLoading(false);
+      window.history.replaceState({}, document.title, location.pathname);
+    } else if (code && !location.pathname.endsWith('/login')) {
+        console.warn(`Código do Google detectado (${code}), mas o pathname atual (${location.pathname}) não é a página de login esperada. O código não será processado por este LoginForm.`);
     }
 
+  // Adicionar location.search e isLoading como dependências para reavaliar se eles mudarem.
+  // No entanto, para processar o 'code' apenas uma vez após o redirect,
+  // o array vazio é geralmente preferido, e a lógica de limpeza da URL ajuda.
+  // Se você tiver problemas com o useEffect não redisparando quando deveria, pode adicionar location.search.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.search]); // Reage a mudanças na URL
+
+  // Função para validar o código de autorização do Google com a API
+  const validateAuthCode = async (code: string) => {
+    console.log('FRONTEND: Enviando código do Google para o backend:', code);
     try {
-      const validationUrl = new URL(`${API_BASE_URL}${validationEndpoint}`);
+      const validationUrl = new URL(`${API_BASE_URL}/auth/login/google/authorized`);
       validationUrl.searchParams.append('code', code);
 
       console.log('FRONTEND: URL de validação:', validationUrl.toString());
@@ -97,7 +110,7 @@ const LoginForm: React.FC = () => {
         data = JSON.parse(responseBodyText);
       } catch (parseError) {
         console.error('FRONTEND: Erro ao parsear JSON da resposta:', parseError, "\nCorpo da resposta:", responseBodyText);
-        throw new Error('Resposta inválida do servidor de autenticação.');
+        throw new Error('Resposta inválida do servidor de autenticação. Verifique o console do backend e a aba de Rede.');
       }
 
       if (!response.ok) {
@@ -105,26 +118,10 @@ const LoginForm: React.FC = () => {
         throw new Error(data.message || data.name || `Falha na autenticação com Google (status: ${response.status}).`);
       }
       
-      console.log('FRONTEND: Dados recebidos do backend (Google Flow):', data);
-      // CORREÇÃO: Usar chaves consistentes com AuthContext e nome de campo 'token' (se for o caso)
-      // Assumindo que 'data' do backend tem: { name: string, token: string, refreshToken: string }
-      if (data.token) { // Verifique se o backend retorna 'token' ou 'accessToken'
-        localStorage.setItem('authToken', data.token);    // Para AuthContext
-        localStorage.setItem('token', data.token);        // Para header_cardapio.tsx (se ainda usar)
-      }
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
-      if (data.name) {
-        localStorage.setItem('userName', data.name);  // Para AuthContext
-        localStorage.setItem('name', data.name);      // Para header_cardapio.tsx (se ainda usar)
-      }
+      console.log('FRONTEND: Dados recebidos do backend:', data);
+      if (data.acessToken) localStorage.setItem('token', data.acessToken);
+      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
       
-      // Idealmente, o AuthContext seria atualizado aqui chamando uma função do contexto.
-      // Ex: auth.processLoginResponse(data); 
-      // Isso forçaria um re-render dos componentes dependentes do estado de autenticação.
-      // Sem isso, pode ser necessário um refresh da página ou navegação para o AuthContext recarregar do localStorage.
-
       console.log('FRONTEND: Usuário autenticado com Google. Redirecionando para /menu...');
       navigate('/menu');
     } catch (error: any) {
@@ -133,37 +130,7 @@ const LoginForm: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]); // Adicionado navigate e API_BASE_URL (se fosse dinâmico)
-
-  useEffect(() => {
-    console.log('LoginForm useEffect disparado. Pathname:', location.pathname, 'Search:', location.search);
-    
-    const urlParams = new URLSearchParams(location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state'); // Captura o parâmetro state
-    const errorParam = urlParams.get('error');
-    const errorDescription = urlParams.get('error_description');
-
-    if (location.pathname.endsWith('/login') && code && !errorParam) {
-      console.log('Código do Google detectado:', code, 'Estado:', state);
-      if (!isLoading) { // Usa o isLoading local do LoginForm
-        setIsLoading(true);
-        validateAuthCode(code, state); // Passa o 'state' para validateAuthCode
-      }
-      setTimeout(() => {
-        window.history.replaceState({}, document.title, location.pathname);
-        console.log('Parâmetros da URL limpos.');
-      }, 100);
-    } else if (errorParam) {
-      console.error('Erro retornado pelo Google na URL:', errorParam, errorDescription);
-      setError(decodeURIComponent(errorDescription || 'Falha na autenticação com Google.'));
-      setIsLoading(false);
-      window.history.replaceState({}, document.title, location.pathname);
-    } else if (code && !location.pathname.endsWith('/login')) {
-        console.warn(`Código do Google detectado (${code}), mas o pathname atual (${location.pathname}) não é /login.`);
-    }
-  // Adicionadas dependências isLoading e validateAuthCode
-  }, [location.pathname, location.search, isLoading, validateAuthCode]);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -177,7 +144,7 @@ const LoginForm: React.FC = () => {
             {error}
           </p>
         )}
-        {isLoading && (
+        {isLoading && ( // Adiciona um indicador de carregamento mais visível
           <div className="text-center py-2 text-orange-400">
             <p>Processando login...</p>
           </div>
@@ -211,6 +178,7 @@ const LoginForm: React.FC = () => {
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
+         {/* Link para Esqueceu a Senha */}
         <div className="mt-2 mb-4 text-sm w-full text-center"> 
           <Link 
             to="/forgot-password" 
@@ -234,10 +202,7 @@ const LoginForm: React.FC = () => {
       </div>
       <SocialLoginButton 
         provider="google" 
-        onClick={handleGoogleLogin}
-        // Se desejar desabilitar o botão SocialLoginButton visualmente,
-        // você precisaria adicionar a prop `disabled` e lógica de estilo nele.
-        // Ex: disabled={isLoading} 
+        onClick={handleGoogleLogin} 
       />
     </div>
   );
