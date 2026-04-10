@@ -1,13 +1,13 @@
 // App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Home } from './Paginas/Home';
-import Login from './Paginas/Login';
-import Cadastro from './Paginas/Cadastro';
-import { Header } from './components/header_cardapio'; // Componente que mostra o cardápio
-import { Admin } from './Paginas/Admin'; // <-- IMPORTE SUA PÁGINA ADMIN (ajuste o caminho se necessário)
-import RedefinirSenha from './Paginas/RedefinirSenha';
-import Autenticacao from './Paginas/Autenticacao';
-import CriarSenha from './Paginas/CriarSenha';
+import { Home } from './Pages/Home';
+import Login from './Pages/Login';
+import Cadastro from './Pages/Register';
+import { Header } from './components/HeaderMenu'; // Componente que mostra o cardápio
+import { Admin } from './Pages/Admin'; // <-- IMPORTE SUA PÁGINA ADMIN (ajuste o caminho se necessário)
+import RedefinirSenha from './Pages/ResetPassword';
+import Autenticacao from './Pages/Authentication';
+import CriarSenha from './Pages/CreatePassword';
 
 export function App() {
   return (

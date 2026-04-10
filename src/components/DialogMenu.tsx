@@ -1,5 +1,5 @@
 import { ShoppingBag, Trash } from 'lucide-react'
-import { Dialog, DialogContent, DialogTrigger } from '../components/dialog'
+import { Dialog, DialogContent, DialogTrigger } from './Dialog'
 import { Separator } from '../ui/separator'
 import { toast } from 'sonner'
 

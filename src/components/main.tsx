@@ -1,4 +1,4 @@
-import { dishes } from './menu'
+import { dishes } from './Menu'
 import { Separator } from '../ui/separator'
 
 interface MenuProps {

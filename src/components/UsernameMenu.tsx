@@ -4,10 +4,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../components/dropdown-menu'
+} from './DropdownMenu'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Button } from '../ui/button'
-import MobileNavLinks from './mobile-nav-links'
+import MobileNavLinks from './MobileNavLinks'
 
 const UsernameMenu = () => {
   const { user, logout, isAuthenticated, loginWithRedirect } = useAuth0()

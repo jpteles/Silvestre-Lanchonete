@@ -1,4 +1,4 @@
-import MobileNav from './mobile-nav'
+import MobileNav from './MobileNav'
 
 export function Header() {
   
