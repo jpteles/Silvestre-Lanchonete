@@ -1,8 +1,8 @@
-import { Inicio } from '../components/Hero';
-import { Header } from '../components/Header';
-import ContatoLocal from '../components/ContactLocal';
-import { DestaqueSemana } from '../components/WeeklyHighlight';
-import { Footer } from '@/components/Footer';
+import { Inicio } from '../components/layout/Hero';
+import { Header } from '../components/layout/Header';
+import ContatoLocal from '../components/contact/ContactLocal';
+import { DestaqueSemana } from '../components/menu/WeeklyHighlight';
+import { Footer } from '@/components/layout/Footer';
 // import AdminProduto from './AdminProduto'
 
 export function Home() {

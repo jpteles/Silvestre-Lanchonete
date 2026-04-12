@@ -1,5 +1,5 @@
 import Logo from '/assets/Logo.png'
-import ResetPasswordForm from '../components/ResetPasswordForm';
+import ResetPasswordForm from '../components/auth/ResetPasswordForm';
 
 function App() {
   return (

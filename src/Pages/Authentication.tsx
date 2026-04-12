@@ -1,5 +1,5 @@
 import Logo from '/assets/Logo.png'
-import VerificationForm from '../components/VerificationForm';
+import VerificationForm from '../components/auth/VerificationForm';
 
 function App() {
   return (

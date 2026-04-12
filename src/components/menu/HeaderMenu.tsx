@@ -1,9 +1,9 @@
 import { CircleUserRound, Menu, Search, ShoppingBag, Trash, LogOut } from 'lucide-react'; // Adicionado LogOut
 import React, { useState, Fragment, useEffect, useCallback } from 'react'; // Adicionado React, useCallback
-import { NavLink } from './NavLink';
+import { NavLink } from '../navigation/NavLink';
 import { Toaster, toast } from 'sonner';
 import { dishes } from './Menu'; // Certifique-se de que este caminho está correto
-import { Main } from './Main'; // Certifique-se de que este caminho está correto
+import { Main } from '../layout/Main'; // Certifique-se de que este caminho está correto
 import { useNavigate, useLocation } from 'react-router-dom'; // Adicionado useLocation
 import {
   Sheet,
@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet'; // Certifique-se de que este caminho está correto
-import { Dialog, DialogContent, DialogTrigger } from './Dialog'; // Certifique-se de que este caminho está correto
+import { Dialog, DialogContent, DialogTrigger } from '../ui/Dialog'; // Certifique-se de que este caminho está correto
 import { Button } from '../ui/button'; // Certifique-se de que este caminho está correto
 import { Separator } from '../ui/separator'; // Certifique-se de que este caminho está correto
 

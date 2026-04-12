@@ -9,7 +9,7 @@ import {
 import { Separator } from '../ui/separator'
 import { Button } from '../ui/button'
 import { useAuth0 } from '@auth0/auth0-react'
-import MobileNavLinks from './MobileNavLinks'
+import MobileNavLinks from '../navigation/MobileNavLinks'
 import { useNavigate } from 'react-router-dom';
 
 

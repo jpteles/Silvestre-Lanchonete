@@ -1,5 +1,5 @@
 import Logo from '/assets/Logo.png'
-import RegisterForm from '../components/RegisterForm';
+import RegisterForm from '../components/auth/RegisterForm';
 
 function App() {
   return (

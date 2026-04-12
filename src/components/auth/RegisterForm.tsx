@@ -1,7 +1,7 @@
 // src/components/RegisterForm.tsx
 import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContent"; //
-import type { RegisterRequestDTO } from "../contexts/AuthContent"; //
+import { useAuth } from "../../contexts/AuthContext"; //
+import type { RegisterRequestDTO } from "../../contexts/AuthContext"; //
 import { useNavigate } from "react-router-dom"; //
 import { Eye, EyeOff } from "lucide-react"; //
 import SocialLoginButton from "./SocialLoginButton"; //

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'; // 🚨 Importante
 import Logo from '/assets/Logo.png';
-import LoginForm from '../components/LoginForm';
+import LoginForm from '../components/auth/LoginForm';
 
 function App() {
   const navigate = useNavigate(); // 🔄 Para redirecionar

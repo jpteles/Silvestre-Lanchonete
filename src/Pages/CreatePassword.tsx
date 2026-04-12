@@ -1,5 +1,5 @@
 import Logo from '/assets/Logo.png'
-import CreatePasswordForm from '../components/CreatePasswordForm';
+import CreatePasswordForm from '../components/auth/CreatePasswordForm';
 
 function App() {
   return (
