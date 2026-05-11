@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 
 export function Home() {
   return (
-    <section className="Home bg-[#EF6A11]">
+    <section>
       <Header />
       <Inicio />
       <DestaqueSemana />
