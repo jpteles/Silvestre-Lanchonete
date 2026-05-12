@@ -12,7 +12,7 @@ export function Header() {
           <Link to="/" className="font-semibold text-zinc-900 hover:text-orange-500">
             Home
           </Link>
-          <Link to="/cardapio" className="font-semibold text-orange-500 hover:text-orange-600">
+          <Link to="/menu" className="font-semibold text-orange-500 hover:text-orange-600">
             Cardápio
           </Link>
           <Link to="/lanches" className="font-semibold text-orange-500 hover:text-orange-600">

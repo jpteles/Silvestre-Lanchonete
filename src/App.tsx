@@ -8,6 +8,7 @@ import { Admin } from './Pages/Admin'; // <-- IMPORTE SUA PÁGINA ADMIN (ajuste 
 import RedefinirSenha from './Pages/ResetPassword';
 import Autenticacao from './Pages/Authentication';
 import CriarSenha from './Pages/CreatePassword';
+import { Lanches } from './Pages/Snacks'
 
 export function App() {
   return (
@@ -16,7 +17,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
-        
+        <Route path="/lanches" element={<Lanches />} />
         {/* Rota para o cardápio/menu principal */}
         <Route path="/menu" element={<Header />} /> 
         
