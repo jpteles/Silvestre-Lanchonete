@@ -5,6 +5,7 @@ import Macarrao from "/assets/macarronada-coxa-sobrecoxa-frango 1.jpg"
 import Peixe from "/assets/file_de_peixe.jpg"
 import Parmegiana from "/assets/parmegiana.jpg"
 import { Leaf, Clock, Heart } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const pratos = [
   {
@@ -73,9 +74,11 @@ export function DestaqueSemana() {
                   <span className="rounded border border-zinc-300 px-3 py-1 text-sm text-zinc-700">
                     {item.preco}
                   </span>
+                   <Link to="/menu">
                   <button className="rounded border border-zinc-300 px-4 py-1 text-sm font-medium text-zinc-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-colors">
                     Comprar
                   </button>
+                  </Link>
                 </div>
               </div>
             </div>

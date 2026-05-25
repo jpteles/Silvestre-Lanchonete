@@ -55,7 +55,7 @@ const RegisterForm: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nome completo"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-black pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
             required
             disabled={isLoading || isGoogleLoading} //
           />
@@ -65,7 +65,7 @@ const RegisterForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Endereço de e-mail"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-black pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
             required
             disabled={isLoading || isGoogleLoading} //
           />
@@ -76,7 +76,7 @@ const RegisterForm: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)} //
               placeholder="Senha"
-              className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
+              className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-neutral-800 pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500" //
               required
               minLength={6} //
               disabled={isLoading || isGoogleLoading} //
@@ -84,7 +84,7 @@ const RegisterForm: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)} //
-              className="absolute right-3 top-3 text-neutral-400" //
+              className="absolute right-3 top-3 text-neutral-800" //
               disabled={isLoading || isGoogleLoading} //
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />} 
@@ -94,7 +94,7 @@ const RegisterForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading || isGoogleLoading} //
-            className="w-full py-3 rounded bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:opacity-90 transition" //
+            className="w-full py-3 rounded bg-gradient-to-r from-orange-500 to-orange-600 text-neutral-100 font-semibold hover:opacity-90 transition" //
           >
             {isLoading ? "Cadastrando..." : "Cadastre-se!"} 
           </button>
@@ -104,7 +104,7 @@ const RegisterForm: React.FC = () => {
           Já tem uma conta?{" "}
           <button
             onClick={() => navigate("/login")} //
-            className="text-white font-semibold hover:underline" //
+            className="text-black font-semibold hover:underline" //
             disabled={isGoogleLoading} //
           >
             Entrar

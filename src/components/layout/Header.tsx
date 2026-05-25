@@ -18,9 +18,6 @@ export function Header() {
           <Link to="/lanches" className="font-semibold text-orange-500 hover:text-orange-600">
             Lanches
           </Link>
-          <Link to="/avaliacoes" className="font-semibold text-orange-500 hover:text-orange-600">
-            Avaliações
-          </Link>
           <Link to="/contato" className="font-semibold text-orange-500 hover:text-orange-600">
             Fale conosco
           </Link>

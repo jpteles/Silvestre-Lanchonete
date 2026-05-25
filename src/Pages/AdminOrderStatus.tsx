@@ -20,8 +20,8 @@ const mockPedido = {
   ]
 };
 
-export function OrderStatus() {
-  const [statusAtual] = useState(mockPedido.status);
+export function AdminOrderStatus() {
+  const [statusAtual, setStatusAtual] = useState(mockPedido.status);
 
   return (
     <div className="min-h-screen bg-zinc-900 px-4 py-8 text-white">
@@ -64,7 +64,7 @@ export function OrderStatus() {
         </div>
 
         {/* Detalhes do pedido */}
-        <div className="rounded-2xl bg-zinc-800 p-6">
+        <div className="mb-6 rounded-2xl bg-zinc-800 p-6">
           <h2 className="mb-4 text-lg font-bold text-orange-500">
             Pedido N° {mockPedido.numero}
           </h2>
@@ -84,9 +84,29 @@ export function OrderStatus() {
           ))}
         </div>
 
+        {/* Botões admin */}
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-zinc-400">
+            Atualizar status
+          </p>
+          {statusEtapas.map((etapa, index) => (
+            <button
+              key={index}
+              onClick={() => setStatusAtual(index)}
+              className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
+                statusAtual === index
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700'
+              }`}
+            >
+              {index + 1}. {etapa.label}
+            </button>
+          ))}
+        </div>
+
       </div>
     </div>
   );
 }
 
-export default OrderStatus;
+export default AdminOrderStatus;

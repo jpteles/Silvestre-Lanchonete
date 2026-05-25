@@ -11,12 +11,11 @@ const SocialLoginButton: React.FC<SocialLoginButtonProps> = ({ provider, onClick
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center justify-center gap-3 py-3 border border-gray-700 rounded-md hover:bg-gray-800 transition"
+      className="w-full flex items-center justify-center gap-3 py-3 border border-gray-700 rounded-md hover:bg-gray-300 transition"
     >
       {provider === 'google' && (
         <>
           <FcGoogle size={24} />
-          <span className="text-white">Continuar com Google</span>
         </>
       )}
     </button>

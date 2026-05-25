@@ -11,7 +11,7 @@ export function Footer() {
             Silvestre Lanchonete
           </h3>
           <p className="pt-3 text-sm md:pt-5 md:text-base xl:text-lg 2xl:pt-6">
-            © Software 2025 - Todos os direitos reservados.
+            © Software 2026 - Todos os direitos reservados.
           </p>
         </div>
       </div>

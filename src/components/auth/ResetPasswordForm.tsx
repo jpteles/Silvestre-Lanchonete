@@ -37,11 +37,11 @@ const ResetPasswordForm: React.FC = () => {
   return (
     <div className="w-full max-w-md">
       {mensagem && <p className="text-green-400 bg-green-900/50 p-3 rounded mb-4 text-center text-sm">{mensagem}</p>}
-      {erro && <p className="text-red-400 bg-red-900/50 p-3 rounded mb-4 text-center text-sm">{erro}</p>}
+      {erro && <p className="text-black bg-red-900/50 p-3 rounded mb-4 text-center text-sm">{erro}</p>}
       
       <form onSubmit={handleSolicitarRedefinicao} className="flex flex-col gap-4">
         <div className="space-y-2">
-          <label htmlFor="email-reset" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="email-reset" className="block text-sm font-medium text-gray-800 mb-1">
             Endereço de e-mail
           </label>
           <input
@@ -50,7 +50,7 @@ const ResetPasswordForm: React.FC = () => {
             value={email}
             onChange={(e) => { setEmail(e.target.value); setErro(''); setMensagem('');}}
             placeholder="seuemail@exemplo.com"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black"
             required
             disabled={carregando}
           />
@@ -66,7 +66,7 @@ const ResetPasswordForm: React.FC = () => {
       </form>
       
       <div className="mt-8 text-center">
-        <p className="text-gray-400">
+        <p className="text-gray-800">
           Lembrou sua senha?{' '}
           <Link to="/login" className="text-orange-500 hover:text-orange-400 font-medium transition-colors duration-200 hover:underline">
             Entrar

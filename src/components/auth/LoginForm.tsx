@@ -137,7 +137,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#F0F0F0]">
       <form onSubmit={handleTraditionalLogin} className="flex flex-col gap-4">
         {error && (
           <p className="text-red-400 bg-red-900/50 p-3 rounded text-center text-sm border border-red-600">
@@ -154,7 +154,7 @@ const LoginForm: React.FC = () => {
           value={email}
           onChange={(e) => { setEmail(e.target.value); setError(''); }}
           placeholder="usuario@exemplo.com"
-          className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
           required
           disabled={isLoading}
         />
@@ -164,7 +164,7 @@ const LoginForm: React.FC = () => {
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(''); }}
             placeholder="Senha"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-white pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md text-black pr-12 focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
             disabled={isLoading}
           />
@@ -182,7 +182,7 @@ const LoginForm: React.FC = () => {
         <div className="mt-2 mb-4 text-sm w-full text-center"> 
           <Link 
             to="/forgot-password" 
-            className="font-medium text-zinc-400 hover:text-zinc-300"
+            className="font-medium text-zinc-800 hover:text-zinc-400"
           >
             Esqueceu a senha?
           </Link>
