@@ -1,64 +1,54 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-// Importar 'type' para tipos
 import type { ReactNode } from "react";
-import apiClient from "../services/api";
-import axios from "axios"; // Import axios para type checking de erro
+import { authApi } from "../services/api";
+import axios from "axios";
 
-// --- Início: Definições de Interfaces (substitua pelos seus imports reais se os tiver em outros arquivos) ---
-// Baseado em LoginRequestDTO.java
 export interface LoginRequestDTO {
   email: string;
   password?: string;
 }
 
-// Baseado em RegisterRequestDTO.java
 export interface RegisterRequestDTO {
   name: string;
   email: string;
   password?: string;
 }
 
-// Baseado em ResponseDTO.java
 export interface AuthResponse {
   name: string;
   token: string;
   refreshToken: string;
+  role?: string;
 }
-// --- Fim: Definições de Interfaces ---
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: { name: string } | null;
+  user: { name: string; role?: string } | null;
   token: string | null;
   login: (credentials: LoginRequestDTO) => Promise<void>;
   register: (userData: RegisterRequestDTO) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  authenticateWithGoogle: (code: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<{ name: string } | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("authToken")
-  );
-  // const [refreshToken, setRefreshToken] = useState<string | null>(localStorage.getItem('refreshToken')); // Descomente se for usar
+  const [user, setUser] = useState<{ name: string; role?: string } | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem("authToken"));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     const storedName = localStorage.getItem("userName");
+    const storedRole = localStorage.getItem("userRole");
     if (storedToken && storedName) {
       setToken(storedToken);
-      setUser({ name: storedName });
+      setUser({ name: storedName, role: storedRole ?? undefined });
       setIsAuthenticated(true);
-      apiClient.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${storedToken}`;
+      authApi.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
     setIsLoading(false);
   }, []);
@@ -67,36 +57,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem("authToken", data.token);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("userName", data.name);
+    if (data.role) localStorage.setItem("userRole", data.role);
     setToken(data.token);
-    // setRefreshToken(data.refreshToken); // Descomente se for usar
-    setUser({ name: data.name });
+    setUser({ name: data.name, role: data.role });
     setIsAuthenticated(true);
-    apiClient.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+    authApi.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
   };
 
   const login = async (credentials: LoginRequestDTO) => {
     setIsLoading(true);
     try {
-      const response = await apiClient.post<AuthResponse>(
-        "/auth/login",
-        credentials
-      ); //
+      const response = await authApi.post<AuthResponse>("/auth/login", credentials);
       if (response.data.token) {
         handleAuthResponse(response.data);
       } else {
-        throw new Error(
-          response.data.name || "Falha no login. Verifique suas credenciais."
-        ); //
+        throw new Error("Falha no login. Verifique suas credenciais.");
       }
     } catch (error) {
-      console.error("Erro no login:", error);
       logout();
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.data &&
-        error.response.data.name
-      ) {
+      if (axios.isAxiosError(error) && error.response?.data?.name) {
         throw new Error(error.response.data.name);
       } else if (error instanceof Error) {
         throw new Error(error.message || "Erro ao tentar fazer login.");
@@ -107,27 +86,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const authenticateWithGoogle = async (code: string) => {
+    setIsLoading(true);
+    try {
+      const response = await authApi.get(`/auth/login/google/authorized?code=${code}`);
+      const { acessToken, refreshToken } = response.data;
+      if (acessToken) {
+        handleAuthResponse({
+          name: "Usuário",
+          token: acessToken,
+          refreshToken: refreshToken || "",
+        });
+      } else {
+        throw new Error("Token não recebido da autenticação social.");
+      }
+    } catch (error) {
+      logout();
+      throw new Error("Falha ao autenticar com o Google.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (userData: RegisterRequestDTO) => {
     setIsLoading(true);
     try {
-      const response = await apiClient.post<AuthResponse>(
-        "/auth/register",
-        userData
-      ); //
+      const response = await authApi.post<AuthResponse>("/auth/register", userData);
       if (response.data.token) {
         handleAuthResponse(response.data);
       } else {
-        throw new Error(response.data.name || "Falha no registro."); //
+        throw new Error("Falha no registro.");
       }
     } catch (error) {
-      console.error("Erro no registro:", error);
       logout();
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.data &&
-        error.response.data.name
-      ) {
+      if (axios.isAxiosError(error) && error.response?.data?.name) {
         throw new Error(error.response.data.name);
       } else if (error instanceof Error) {
         throw new Error(error.message || "Erro ao tentar registrar.");
@@ -142,11 +134,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     setToken(null);
-    // setRefreshToken(null); // Descomente se for usar
     setUser(null);
     setIsAuthenticated(false);
-    delete apiClient.defaults.headers.common["Authorization"];
+    delete authApi.defaults.headers.common["Authorization"];
     setIsLoading(false);
   };
 
@@ -160,6 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         register,
         logout,
         isLoading,
+        authenticateWithGoogle,
       }}
     >
       {!isLoading && children}

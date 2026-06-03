@@ -1,87 +1,128 @@
-import { dishes } from '../menu/Menu'
+import { useEffect, useState } from 'react'
 import { Separator } from '../ui/separator'
+import { productApi } from '../../services/api'
 
-interface MenuProps {
-  nome: string
-  nameSection: string | null
-  id: number
-  valor: string
-  imageSrc?: string
-  desc?: string
+interface Produto {
+  id: string
+  name: string
+  description: string
+  price: number
+  category: string
+  available: boolean
+  imageUrl?: string
 }
 
 interface MainProps {
   searchText: string
-  addToBag: (dish: MenuProps) => void
-  selectedDishes: MenuProps[]
+  addToBag: (dish: any) => void
+  selectedDishes: any[]
 }
 
 export function Main({ searchText, addToBag }: MainProps) {
-  let currentSection = ''
+  const [produtos, setProdutos] = useState<Produto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState('')
 
-  const sections = dishes.reduce(
-    (acc, dish) => {
-      if (dish.nameSection) currentSection = dish.nameSection
-      const section = currentSection
-      if (!acc[section]) acc[section] = []
-      acc[section].push(dish)
-      return acc
-    },
-    {} as Record<string, typeof dishes>,
+  useEffect(() => {
+    const buscarProdutos = async () => {
+      try {
+        setLoading(true)
+        const response = await productApi.get('/products', {
+          params: { available: true, size: 50 }
+        })
+        setProdutos(response.data.content ?? response.data)
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err)
+        setErro('Não foi possível carregar o cardápio.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    buscarProdutos()
+  }, [])
+
+  // Filtra pelo searchText
+  const produtosFiltrados = produtos.filter(
+    (p) =>
+      searchText.trim() === '' ||
+      p.name.toLowerCase().includes(searchText.toLowerCase())
   )
 
-  const filtered = Object.entries(sections).reduce(
-    (acc, [section, items]) => {
-      const filteredItems = items.filter(
-        (dish) =>
-          searchText.trim() === '' ||
-          dish.nome.toLowerCase().includes(searchText.toLowerCase()),
-      )
-      if (filteredItems.length > 0) acc[section] = filteredItems
+  // Agrupa por categoria
+  const secoes = produtosFiltrados.reduce(
+    (acc, produto) => {
+      const cat = produto.category ?? 'Outros'
+      if (!acc[cat]) acc[cat] = []
+      acc[cat].push(produto)
       return acc
     },
-    {} as Record<string, typeof dishes>,
+    {} as Record<string, Produto[]>
   )
 
-  const sectionNames = Object.keys(filtered)
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-zinc-400">Carregando cardápio...</p>
+      </div>
+    )
+  }
+
+  if (erro) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-red-400">{erro}</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white mx-auto max-w-6xl px-4 pt-32 pb-16 sm:px-6 md:pt-40 lg:px-8 xl:pt-44">
+    <div className="min-h-screen bg-white mx-auto max-w-5xl px-4 pt-32 pb-16 sm:px-6 md:pt-40 lg:px-8 xl:pt-44">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {sectionNames.map((sectionName) => (
+        {Object.entries(secoes).map(([categoria, itens]) => (
           <div
-            key={sectionName}
-            id={sectionName.replace(/\s+/g, '-').toLowerCase()}
+            key={categoria}
+            id={categoria.replace(/\s+/g, '-').toLowerCase()}
             className="rounded-xl border border-zinc-200 p-4"
           >
-            <h2 className="mb-3 text-lg font-bold text-orange-500">
-              {sectionName}
-            </h2>
+            <h2 className="mb-3 text-lg font-bold text-orange-500">{categoria}</h2>
             <Separator className="mb-4 bg-zinc-200" />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {filtered[sectionName].map((dish) => (
+              {itens.map((produto) => (
                 <button
-                  key={dish.id}
+                  key={produto.id}
                   type="button"
-                  onClick={() => addToBag(dish)}
+                  onClick={() => addToBag({
+                    id: produto.id,
+                    nome: produto.name,
+                    valor: `R$ ${produto.price.toFixed(2)}`,
+                    imageSrc: produto.imageUrl,
+                    desc: produto.description,
+                  })}
                   className="flex items-start gap-3 rounded-lg border border-zinc-200 p-3 text-left duration-300 hover:bg-zinc-50"
                 >
-                  <div className="h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg">
+                  {produto.imageUrl ? (
                     <img
-                      src={dish.imageSrc}
-                      alt={dish.nome}
-                      className="h-full w-full object-cover"
+                      src={produto.imageUrl}
+                      alt={produto.name}
+                      className="h-16 w-20 flex-shrink-0 rounded-lg object-cover"
                     />
-                  </div>
+                  ) : (
+                    <div className="h-16 w-20 flex-shrink-0 rounded-lg bg-zinc-100" />
+                  )}
                   <div className="flex flex-col gap-1">
                     <h3 className="text-xs font-bold text-zinc-900 sm:text-sm">
-                      {dish.nome}
+                      {produto.name}
                     </h3>
-                    {dish.desc && (
-                      <p className="text-xs text-zinc-500 leading-tight">{dish.desc}</p>
+                    {produto.description && (
+                      <p className="text-xs leading-tight text-zinc-500">
+                        {produto.description}
+                      </p>
                     )}
-                    <p className="text-xs text-zinc-400 mt-1">{dish.valor}</p>
+                    <p className="mt-1 text-xs text-zinc-400">
+                      A partir de: R$ {produto.price.toFixed(2)}
+                    </p>
                   </div>
                 </button>
               ))}

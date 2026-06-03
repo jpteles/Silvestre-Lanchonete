@@ -1,9 +1,6 @@
-// src/components/auth/ResetPasswordForm.tsx (ou o caminho que preferir)
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-
-const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app';
+import { authApi } from '../../services/api';
 
 const ResetPasswordForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -19,16 +16,15 @@ const ResetPasswordForm: React.FC = () => {
     setCarregando(true);
 
     try {
-      await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email }); //
+      // Usamos o post apontando para a rota correta e enviando o email no corpo da requisição
+      await authApi.post('/auth/forgot-password', { email });
       
       setMensagem('Se um e-mail correspondente for encontrado, um código de verificação será enviado.');
       setTimeout(() => {
         navigate('/verificar-codigo', { state: { email } });
       }, 3000);
-
     } catch (err: any) {
-      console.error('Erro ao solicitar redefinição de senha:', err);
-      setErro(err.response?.data || err.response?.data?.message || 'Falha ao solicitar redefinição de senha. Tente novamente.');
+      setErro(err.response?.data?.message || 'Falha ao solicitar redefinição de senha. Tente novamente.');
     } finally {
       setCarregando(false);
     }
@@ -36,39 +32,47 @@ const ResetPasswordForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-md">
-      {mensagem && <p className="text-green-400 bg-green-900/50 p-3 rounded mb-4 text-center text-sm">{mensagem}</p>}
-      {erro && <p className="text-black bg-red-900/50 p-3 rounded mb-4 text-center text-sm">{erro}</p>}
-      
+      {mensagem && (
+        <p className="mb-4 rounded bg-green-900/50 p-3 text-center text-sm text-green-400">
+          {mensagem}
+        </p>
+      )}
+      {erro && (
+        <p className="mb-4 rounded border border-red-600 bg-red-900/50 p-3 text-center text-sm text-red-400">
+          {erro}
+        </p>
+      )}
+
       <form onSubmit={handleSolicitarRedefinicao} className="flex flex-col gap-4">
         <div className="space-y-2">
-          <label htmlFor="email-reset" className="block text-sm font-medium text-gray-800 mb-1">
+          <label htmlFor="email-reset" className="mb-1 block text-sm font-medium text-gray-800">
             Endereço de e-mail
           </label>
           <input
             id="email-reset"
             type="email"
             value={email}
-            onChange={(e) => { setEmail(e.target.value); setErro(''); setMensagem('');}}
+            onChange={(e) => { setEmail(e.target.value); setErro(''); setMensagem(''); }}
             placeholder="seuemail@exemplo.com"
-            className="w-full px-4 py-3 bg-transparent border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black"
+            className="w-full rounded-md border border-gray-300 bg-transparent px-4 py-3 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
             disabled={carregando}
           />
         </div>
-        
-        <button 
+
+        <button
           type="submit"
           disabled={carregando}
-          className="w-full py-3 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-md bg-orange-600 py-3 font-medium text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {carregando ? 'Enviando...' : 'Enviar Código de Redefinição'}
         </button>
       </form>
-      
+
       <div className="mt-8 text-center">
         <p className="text-gray-800">
           Lembrou sua senha?{' '}
-          <Link to="/login" className="text-orange-500 hover:text-orange-400 font-medium transition-colors duration-200 hover:underline">
+          <Link to="/login" className="font-medium text-orange-500 transition hover:text-orange-400 hover:underline">
             Entrar
           </Link>
         </p>

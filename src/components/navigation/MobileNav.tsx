@@ -8,15 +8,13 @@ import {
 } from '../ui/sheet'
 import { Separator } from '../ui/separator'
 import { Button } from '../ui/button'
-import { useAuth0 } from '@auth0/auth0-react'
+import { useAuth } from '../../contexts/AuthContext'
 import MobileNavLinks from '../navigation/MobileNavLinks'
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom'
 
 const MobileNav = () => {
-  const { isAuthenticated, user } = useAuth0()
-
-const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <Sheet>
@@ -32,7 +30,6 @@ const navigate = useNavigate()
             </span>
           ) : (
             <span className="text-base font-bold text-zinc-50">
-              {' '}
               Bem vindo a Silvestre Lanchonete!
             </span>
           )}
@@ -44,10 +41,10 @@ const navigate = useNavigate()
           ) : (
             <div className="space-y-5">
               <Button
-               onClick={() => navigate('/login')}
+                onClick={() => navigate('/login')}
                 className="w-full bg-slate-900 font-bold"
-                                            >
-                  Log In
+              >
+                Log In
               </Button>
               <MobileNavLinks showMenuButton={true} isLogout={false} />
             </div>

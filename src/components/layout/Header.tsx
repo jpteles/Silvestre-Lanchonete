@@ -9,17 +9,8 @@ export function Header() {
           <img src="/assets/icon.svg" alt="Silvestre Lanchonete" className="h-16 w-16" />
         </Link>
         <nav className="hidden md:flex items-center gap-10">
-          <Link to="/" className="font-semibold text-zinc-900 hover:text-orange-500">
-            Home
-          </Link>
           <Link to="/menu" className="font-semibold text-orange-500 hover:text-orange-600">
             Cardápio
-          </Link>
-          <Link to="/lanches" className="font-semibold text-orange-500 hover:text-orange-600">
-            Lanches
-          </Link>
-          <Link to="/contato" className="font-semibold text-orange-500 hover:text-orange-600">
-            Fale conosco
           </Link>
         </nav>
           <div className="mr-28">

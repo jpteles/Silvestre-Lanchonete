@@ -1,9 +1,6 @@
-// src/components/auth/VerificationForm.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import axios from 'axios';
-
-const API_BASE_URL = 'https://api-docker-141213034707.us-central1.run.app';
+import { authApi } from '../../services/api';
 
 const VerificationForm: React.FC = () => {
   const [codigo, setCodigo] = useState<string[]>(Array(6).fill(''));
@@ -65,11 +62,8 @@ const VerificationForm: React.FC = () => {
         novoCodigo[i] = dadosColados[i];
       }
       setCodigo(novoCodigo);
-      const focoIndex = Math.min(5, dadosColados.length -1); // Foca no último preenchido ou no 6º
-      if(dadosColados.length === 6) inputRefs.current[5]?.focus();
-      else if (dadosColados.length < 6 && dadosColados.length > 0) inputRefs.current[focoIndex+1]?.focus();
-      else inputRefs.current[0]?.focus();
-
+      if (dadosColados.length === 6) inputRefs.current[5]?.focus();
+      else inputRefs.current[dadosColados.length]?.focus();
     }
     setErro('');
   };
@@ -88,23 +82,18 @@ const VerificationForm: React.FC = () => {
     }
 
     try {
-      // O DTO no backend para /auth/validate-code é CodeValidationRequestDTO(String token)
-      // A API espera um campo "token" no corpo do JSON.
-      await axios.post(`${API_BASE_URL}/auth/validate-code`, { //
-        token: codigoVerificacao 
-      });
+      // Substituído authApi.validateCode() pelo método post do Axios
+      // A chave "token" corresponde exatamente ao esperado pelo CodeValidationRequestDTO
+      await authApi.post('/auth/validate-code', { token: codigoVerificacao });
       
       setMensagem('Código verificado com sucesso!');
-      // Passamos o 'codigoVerificacao' como 'tokenRedefinicao' para a próxima etapa
       setTimeout(() => {
         navigate('/criar-nova-senha', { state: { tokenRedefinicao: codigoVerificacao, email } });
       }, 1500);
-
     } catch (err: any) {
-      console.error('Erro ao verificar código:', err);
       setCodigo(Array(6).fill(''));
       inputRefs.current[0]?.focus();
-      setErro(err.response?.data || err.response?.data?.message || 'Código de verificação inválido ou expirado.');
+      setErro(err.response?.data?.message || 'Código de verificação inválido ou expirado.');
     } finally {
       setCarregando(false);
     }
@@ -115,25 +104,37 @@ const VerificationForm: React.FC = () => {
     setMensagem('');
     setReenviando(true);
     try {
-        await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email }); //
-        setMensagem('Um novo código de verificação foi enviado para o seu e-mail.');
+      // Alterado de .forgotPassword(email) para .post()
+      // Certifique-se de que a rota no seu backend Java é exatamente essa (ex: '/auth/forgot-password' ou '/auth/password-reset')
+      await authApi.post('/auth/forgot-password', { email });
+      
+      setMensagem('Um novo código de verificação foi enviado para o seu e-mail.');
     } catch (err: any) {
-        console.error('Erro ao reenviar código:', err);
-        setErro(err.response?.data || err.response?.data?.message || 'Falha ao reenviar o código. Tente novamente.');
+      setErro(err.response?.data?.message || 'Falha ao reenviar o código. Tente novamente.');
     } finally {
-        setReenviando(false);
+      setReenviando(false);
     }
   };
 
   return (
     <div className="w-full max-w-md">
-      <h2 className="text-2xl font-bold text-center text-white mb-2">Verificar Código</h2>
-      <p className="text-gray-400 text-center text-sm mb-6">
-        Digite o código de 6 dígitos enviado para <strong className="text-orange-400">{email || "seu e-mail"}</strong>.
+      <h2 className="mb-2 text-center text-2xl font-bold text-black">Verificar Código</h2>
+      <p className="mb-6 text-center text-sm text-gray-800">
+        Digite o código de 6 dígitos enviado para{' '}
+        <strong className="text-orange-400">{email || 'seu e-mail'}</strong>.
       </p>
-      {mensagem && <p className="text-green-400 bg-green-900/50 p-3 rounded mb-4 text-center text-sm">{mensagem}</p>}
-      {erro && <p className="text-red-400 bg-red-900/50 p-3 rounded mb-4 text-center text-sm">{erro}</p>}
-      
+
+      {mensagem && (
+        <p className="mb-4 rounded bg-green-900/50 p-3 text-center text-sm text-green-900">
+          {mensagem}
+        </p>
+      )}
+      {erro && (
+        <p className="mb-4 rounded border border-red-600 bg-red-900/50 p-3 text-center text-sm text-red-400">
+          {erro}
+        </p>
+      )}
+
       <form onSubmit={handleVerificacao} className="flex flex-col gap-6">
         <div className="flex justify-between gap-2 sm:gap-3" onPaste={handlePaste}>
           {codigo.map((digito, index) => (
@@ -147,39 +148,41 @@ const VerificationForm: React.FC = () => {
               value={digito}
               onChange={e => handleChange(index, e.target.value)}
               onKeyDown={e => handleKeyDown(index, e)}
-              className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-semibold bg-transparent border-2 border-gray-700 rounded-md focus:outline-none focus:border-orange-500 text-white transition-colors duration-200 disabled:opacity-50"
+              className="h-14 w-12 rounded-md border-2 border-gray-700 bg-transparent text-center text-xl font-semibold text-black transition-colors focus:border-orange-500 focus:outline-none disabled:opacity-50 sm:h-16 sm:w-14 sm:text-2xl"
               required
               disabled={carregando}
               aria-label={`Dígito ${index + 1} do código de verificação`}
             />
           ))}
         </div>
-        
-        <button 
+
+        <button
           type="submit"
           disabled={carregando || codigo.join('').length !== 6}
-          className="w-full py-3 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-md bg-orange-600 py-3 font-medium text-black transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {carregando ? 'Verificando...' : 'Verificar'}
         </button>
       </form>
-      
+
       <div className="mt-8 text-center">
-        <p className="text-gray-400 text-sm">
+        <p className="text-sm text-gray-800">
           Não recebeu o código?{' '}
-          <button 
+          <button
             onClick={handleReenviarCodigo}
             disabled={reenviando || carregando}
-            className="text-orange-500 hover:text-orange-400 font-medium transition-colors duration-200 hover:underline disabled:opacity-70 disabled:cursor-not-allowed"
+            className="font-medium text-orange-500 transition hover:text-orange-400 hover:underline disabled:cursor-not-allowed disabled:opacity-70"
           >
             {reenviando ? 'Reenviando...' : 'Reenviar'}
           </button>
         </p>
-         <p className="mt-4 text-sm">
-            <Link to="/forgot-password" 
-                className="text-gray-400 hover:text-gray-300 transition-colors duration-200 hover:underline">
-                Voltar para inserir e-mail
-            </Link>
+        <p className="mt-4 text-sm">
+          <Link
+            to="/forgot-password"
+            className="text-gray-800 transition hover:text-gray-600 hover:underline"
+          >
+            Voltar para inserir e-mail
+          </Link>
         </p>
       </div>
     </div>
