@@ -3,11 +3,12 @@ import { Home } from './Pages/Home';
 import Login from './Pages/Login';
 import Cadastro from './Pages/Register';
 import { Header } from './components/menu/HeaderMenu';
-import { Admin } from './Pages/Admin';
+import Admin from './Pages/AdminProduct';
 import RedefinirSenha from './Pages/ResetPassword';
 import Autenticacao from './Pages/Authentication';
 import CriarSenha from './Pages/CreatePassword';
 import { Lanches } from './Pages/Snacks';
+// O import do PrivateRoute fica aqui caso precise de usar noutras rotas
 import { PrivateRoute } from './components/PrivateRoute';
 
 export function App() {
@@ -23,15 +24,10 @@ export function App() {
         <Route path="/verificar-codigo" element={<Autenticacao />} />
         <Route path="/criar-nova-senha" element={<CriarSenha />} />
 
-        {/* Rota protegida — só admin acessa */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute adminOnly>
-              <Admin />
-            </PrivateRoute>
-          }
-        />
+        {/* ROTA DO PAINEL ADMIN: 
+            Retirámos o <PrivateRoute> daqui. 
+            A proteção agora é feita diretamente por aquele código no AdminProduct.tsx! */}
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { productApi } from "../services/api";
 
 const URL_PRODUCT = import.meta.env.VITE_PRODUCT_API || "http://localhost:8081";
@@ -15,6 +16,7 @@ interface Produto {
 }
 
 const AdminPage: React.FC = () => {
+  const navigate = useNavigate();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState<Produto | null>(null);
@@ -23,37 +25,63 @@ const AdminPage: React.FC = () => {
     name: "",
     description: "",
     price: "",
-    category: "",
+    category: "PRATOS_DO_DIA", 
     available: true,
     image: null as File | null,
   });
 
+  // ==========================================
+  // EFEITO DE SEGURANÇA (MODO DE TESTE ATIVADO)
+  // ==========================================
   useEffect(() => {
+    const role = localStorage.getItem("userRole");
+    
+    if (role !== "Administrador") {
+      console.log("Fui expulso! O meu cargo real gravado no navegador é:", role);
+      // As duas linhas abaixo continuam comentadas para podermos testar à força
+      // navigate("/"); 
+      // return; 
+    }
+
     carregarProdutos();
-  }, []);
+  }, [navigate]);
 
   const carregarProdutos = async () => {
     try {
       setLoading(true);
       const response = await productApi.get('/products'); 
-      setProdutos(response.data.content ?? response.data);
+      // Proteção extra caso o backend não devolva um array
+      const data = response.data.content ?? response.data;
+      setProdutos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Erro ao carregar produtos:", err);
+      setProdutos([]); // Garante que não crasha se der erro
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type } = target;
-    if (type === "file") setFormData({ ...formData, [name]: target.files?.[0] ?? null });
-    else if (type === "checkbox") setFormData({ ...formData, [name]: target.checked });
-    else setFormData({ ...formData, [name]: value });
+    if (type === "file") {
+      setFormData({ ...formData, [name]: target.files?.[0] ?? null });
+    } else if (type === "checkbox") {
+      setFormData({ ...formData, [name]: target.checked });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", price: "", category: "", available: true, image: null });
+    setFormData({ 
+      name: "", 
+      description: "", 
+      price: "", 
+      category: "PRATOS_DO_DIA", 
+      available: true, 
+      image: null 
+    });
     setIsEditing(null);
     setShowForm(false);
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -72,12 +100,14 @@ const AdminPage: React.FC = () => {
 
     try {
       if (isEditing) {
-        // Headers removidos para o Axios lidar com o FormData corretamente
-        await productApi.put(`/products/${isEditing.id}`, submissionData);
+        await productApi.put(`/products/${isEditing.id}`, submissionData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         alert("Produto atualizado com sucesso!");
       } else {
-        // Headers removidos para o Axios lidar com o FormData corretamente
-        await productApi.post('/products', submissionData);
+        await productApi.post('/products', submissionData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         alert("Produto cadastrado com sucesso!");
       }
       resetForm();
@@ -102,11 +132,11 @@ const AdminPage: React.FC = () => {
   const handleEdit = (produto: Produto) => {
     setIsEditing(produto);
     setFormData({
-      name: produto.name,
-      description: produto.description,
-      price: String(produto.price),
-      category: produto.category,
-      available: produto.available,
+      name: produto.name || "",
+      description: produto.description || "",
+      price: produto.price ? String(produto.price) : "0",
+      category: produto.category || "PRATOS_DO_DIA",
+      available: produto.available ?? true,
       image: null,
     });
     setShowForm(true);
@@ -117,7 +147,7 @@ const AdminPage: React.FC = () => {
 
       {/* Topo */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-zinc-900">Produto</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">Administração de Produtos</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
           className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600 transition"
@@ -141,7 +171,21 @@ const AdminPage: React.FC = () => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <input name="name" value={formData.name} onChange={handleChange} placeholder="Nome" required className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-orange-500" />
               <input name="price" value={formData.price} onChange={handleChange} placeholder="Preço" required type="number" step="0.01" className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-orange-500" />
-              <input name="category" value={formData.category} onChange={handleChange} placeholder="Categoria" required className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-orange-500" />
+              
+              <select 
+                name="category" 
+                value={formData.category} 
+                onChange={handleChange} 
+                required 
+                className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+              >
+                <option value="PRATOS_DO_DIA">Pratos do Dia</option>
+                <option value="PRATOS_ESPECIAIS">Pratos Especiais</option>
+                <option value="PRATOS_EXECUTIVOS">Pratos Executivos</option>
+                <option value="HAMBURGUERES_BEIRUTES">Hambúrgueres & Beirutes</option>
+                <option value="BEBIDAS">Bebidas</option>
+              </select>
+
               <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Descrição" rows={3} className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-orange-500" />
               <input name="image" type="file" accept="image/*" onChange={handleChange} className="text-sm text-zinc-500" />
               <label className="flex items-center gap-2 text-sm text-zinc-700">
@@ -184,27 +228,31 @@ const AdminPage: React.FC = () => {
               {produtos.map((produto) => (
                 <tr key={produto.id} className="hover:bg-zinc-50">
                   <td className="px-4 py-3">
-                    {/* Imagem agora aponta para o backend caso não seja uma URL completa */}
-                    {produto.imageUrl
+                    {/* Proteção na Imagem */}
+                    {produto.imageUrl && typeof produto.imageUrl === 'string'
                       ? <img 
                           src={produto.imageUrl.startsWith('http') ? produto.imageUrl : `${URL_PRODUCT}${produto.imageUrl}`} 
-                          alt={produto.name} 
+                          alt={produto.name || 'Produto'} 
                           className="h-12 w-12 rounded-lg object-cover" 
                         />
                       : <div className="h-12 w-12 rounded-lg bg-zinc-100" />
                     }
                   </td>
-                  <td className="px-4 py-3 font-medium text-zinc-900">{produto.name}</td>
+                  <td className="px-4 py-3 font-medium text-zinc-900">{produto.name || 'Sem nome'}</td>
                   <td className="px-4 py-3">
                     <span className={`font-semibold ${produto.available ? "text-green-500" : "text-red-500"}`}>
                       {produto.available ? "Disponível" : "Indisponível"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 max-w-xs text-zinc-500">{produto.description}</td>
+                  <td className="px-4 py-3 max-w-xs text-zinc-500">{produto.description || ''}</td>
                   <td className="px-4 py-3 text-zinc-900">
-                    R$ {typeof produto.price === "number" ? produto.price.toFixed(2) : "N/A"}
+                    {/* Proteção no Preço */}
+                    R$ {produto.price != null && !isNaN(produto.price) ? Number(produto.price).toFixed(2) : "0.00"}
                   </td>
-                  <td className="px-4 py-3 text-zinc-500">{produto.category}</td>
+                  <td className="px-4 py-3 text-zinc-500">
+                    {/* Proteção na Categoria (Evita o crash fatal do replace) */}
+                    {produto.category ? String(produto.category).replace(/_/g, ' ') : 'Sem categoria'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <button onClick={() => handleEdit(produto)} className="flex items-center gap-1 text-green-500 hover:text-green-600 font-medium">

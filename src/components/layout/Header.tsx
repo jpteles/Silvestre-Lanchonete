@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
 import MobileNav from '../navigation/MobileNav'
+import { useAuth } from '../../contexts/AuthContext' // <-- Importando o seu contexto
 
 export function Header() {
+  const { user, isAuthenticated } = useAuth() // <-- Puxando o usuário atual
+
   return (
     <div className="w-full border-b border-[#724A2C] bg-white">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-8">
@@ -12,10 +15,18 @@ export function Header() {
           <Link to="/menu" className="font-semibold text-orange-500 hover:text-orange-600">
             Cardápio
           </Link>
+
+          {/* BOTÃO ADMIN: Só aparece se estiver logado E for Administrador */}
+          {isAuthenticated && user?.role === 'Administrador' && (
+            <Link to="/admin" className="rounded-lg bg-orange-500 px-4 py-2 font-bold text-white transition hover:bg-orange-600">
+              Painel Admin
+            </Link>
+          )}
+
         </nav>
-          <div className="mr-28">
-            <MobileNav />
-          </div>
+        <div className="mr-28">
+          <MobileNav />
+        </div>
       </div>
     </div>
   )
