@@ -8,8 +8,8 @@ import RedefinirSenha from './Pages/ResetPassword';
 import Autenticacao from './Pages/Authentication';
 import CriarSenha from './Pages/CreatePassword';
 import { Lanches } from './Pages/Snacks';
-// O import do PrivateRoute fica aqui caso precise de usar noutras rotas
-import { PrivateRoute } from './components/PrivateRoute';
+import OrderStatus from './Pages/OrderStatus';
+import { CheckoutCart } from './components/CheckoutCart'; 
 
 export function App() {
   return (
@@ -23,11 +23,9 @@ export function App() {
         <Route path="/forgot-password" element={<RedefinirSenha />} />
         <Route path="/verificar-codigo" element={<Autenticacao />} />
         <Route path="/criar-nova-senha" element={<CriarSenha />} />
-
-        {/* ROTA DO PAINEL ADMIN: 
-            Retirámos o <PrivateRoute> daqui. 
-            A proteção agora é feita diretamente por aquele código no AdminProduct.tsx! */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/pedidos" element={<OrderStatus />} />
+        <Route path="/carrinho" element={<CheckoutCart />} />
       </Routes>
     </BrowserRouter>
   );

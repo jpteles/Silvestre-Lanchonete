@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../hooks/useCart';
 import { CartDialog } from './CartDialog';
 import { MenuSheet } from './MenuSheet';
 import { SectionNav } from '../navigation/SectionNav';
 import { Main } from '../layout/Main';
+
+// Importando a lista estática do seu Menu
 import { dishes } from './Menu';
-import { Link } from 'react-router-dom'
 
 export function Header() {
   const [searchText, setSearchText] = useState('');
@@ -26,8 +27,6 @@ export function Header() {
     toast.info('Voce foi desconectado.');
     navigate('/');
   };
-
-  const handleNavigateHome = () => navigate('/');
 
   function handleNavLinkClick(e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
@@ -51,8 +50,8 @@ export function Header() {
 
         <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
           <Link to="/">
-          <img src="/assets/icon.svg" alt="Silvestre Lanchonete" className="h-16 w-16" />
-        </Link>
+            <img src="/assets/icon.svg" alt="Silvestre Lanchonete" className="h-16 w-16" />
+          </Link>
 
           <div className="hidden md:flex flex-grow items-center gap-3 rounded-lg border border-zinc-200 px-3 py-1.5 lg:mx-8 xl:mx-16 2xl:mx-24 max-w-xs md:max-w-sm lg:max-w-md">
             <Search className="size-4 text-orange-500 xl:size-5" />
@@ -60,7 +59,7 @@ export function Header() {
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="w-full border-0 bg-transparent p-0 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-0 md:text-base"
-              placeholder="Buscar no cardapio..."
+              placeholder="Buscar no cardápio..."
             />
           </div>
 
@@ -87,14 +86,16 @@ export function Header() {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="w-full border-0 bg-transparent p-0 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-0"
-            placeholder="Buscar no cardapio..."
+            placeholder="Buscar no cardápio..."
           />
         </div>
 
         <SectionNav dishes={dishes} onNavLinkClick={handleNavLinkClick} />
       </div>
 
+      {/* AQUI ESTAVA O PROBLEMA: Precisamos passar a prop "dishes" para o Main */}
       <Main
+        dishes={dishes} 
         searchText={searchText}
         addToBag={addToBag}
         selectedDishes={selectedDishes}

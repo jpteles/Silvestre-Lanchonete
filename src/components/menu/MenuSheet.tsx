@@ -1,4 +1,4 @@
-import { CircleUserRound, Menu, LogOut } from 'lucide-react';
+import { CircleUserRound, Menu, LogOut, ClipboardList, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -10,6 +10,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet';
+// Importe o seu contexto de autenticação para pegarmos a Role do usuário
+import { useAuth } from '../../contexts/AuthContext'; 
 
 interface MenuSheetProps {
   isAuthenticated: boolean;
@@ -19,6 +21,10 @@ interface MenuSheetProps {
 
 export function MenuSheet({ isAuthenticated, userName, onLogout }: MenuSheetProps) {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Pegando o usuário para checar o nível de acesso
+
+  // Verificação de segurança: checa se é ADMIN
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'Administrador';
 
   return (
     <Sheet>
@@ -51,7 +57,34 @@ export function MenuSheet({ isAuthenticated, userName, onLogout }: MenuSheetProp
           <SheetDescription asChild>
             <div className="flex flex-col gap-4 pt-2">
               {isAuthenticated ? (
-                <div className="space-y-4">
+                <div className="space-y-2"> {/* Reduzi o gap aqui para os botões ficarem mais juntos */}
+                  
+                  {/* --- NOVOS BOTÕES ADICIONADOS AQUI --- */}
+                  
+                  {/* Botão de Pedidos (Aparece para todos) */}
+                  <Button
+                    onClick={() => navigate('/pedidos')}
+                    variant="ghost"
+                    className="w-full justify-start gap-2 px-2 py-1.5 text-zinc-300 hover:bg-white/10 hover:text-white"
+                  >
+                    <ClipboardList className="size-4" />
+                    {isAdmin ? 'Gerenciar Pedidos' : 'Meus Pedidos'}
+                  </Button>
+
+                  {/* Botão de Admin (Aparece SÓ para Admin) */}
+                  {isAdmin && (
+                    <Button
+                      onClick={() => navigate('/admin')}
+                      variant="ghost"
+                      className="w-full justify-start gap-2 px-2 py-1.5 text-orange-500 hover:bg-orange-500/10 hover:text-orange-400"
+                    >
+                      <Settings className="size-4" />
+                      Administração de produtos
+                    </Button>
+                  )}
+                  
+                  {/* --------------------------------------- */}
+
                   <Button
                     onClick={onLogout}
                     variant="ghost"

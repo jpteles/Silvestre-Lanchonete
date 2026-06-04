@@ -1,135 +1,138 @@
-import { useEffect, useState } from 'react'
-import { Separator } from '../ui/separator'
-import { productApi } from '../../services/api'
+import React, { useMemo } from 'react';
 
-interface Produto {
-  id: string
-  name: string
-  description: string
-  price: number
-  category: string
-  available: boolean
-  imageUrl?: string
+// Tipagem baseada no que você me enviou
+export interface MenuProps {
+  nome: string;
+  nameSection: string | null;
+  id: number;
+  valor: string;
+  imageSrc: string;
+  desc?: string;
 }
 
 interface MainProps {
-  searchText: string
-  addToBag: (dish: any) => void
-  selectedDishes: any[]
+  dishes?: MenuProps[]; // Tornamos opcional e com valor default abaixo para evitar quebra
+  searchText?: string;
+  addToBag?: (dish: any) => void;
+  selectedDishes?: any[];
 }
 
-export function Main({ searchText, addToBag }: MainProps) {
-  const [produtos, setProdutos] = useState<Produto[]>([])
-  const [loading, setLoading] = useState(true)
-  const [erro, setErro] = useState('')
-
-  useEffect(() => {
-    const buscarProdutos = async () => {
-      try {
-        setLoading(true)
-        const response = await productApi.get('/products', {
-          params: { available: true, size: 50 }
-        })
-        setProdutos(response.data.content ?? response.data)
-      } catch (err) {
-        console.error('Erro ao carregar produtos:', err)
-        setErro('Não foi possível carregar o cardápio.')
-      } finally {
-        setLoading(false)
-      }
+export function Main({ dishes = [], searchText = '', addToBag, selectedDishes }: MainProps) {
+  
+  // 1. Agrupando os pratos pelas categorias
+  const groupedDishes = useMemo(() => {
+    // Trava de segurança contra tela branca
+    if (!Array.isArray(dishes) || dishes.length === 0) {
+      return {};
     }
 
-    buscarProdutos()
-  }, [])
+    let currentCategory = 'Outros';
+    const groups: Record<string, MenuProps[]> = {};
 
-  // Filtra pelo searchText
-  const produtosFiltrados = produtos.filter(
-    (p) =>
-      searchText.trim() === '' ||
-      p.name.toLowerCase().includes(searchText.toLowerCase())
-  )
+    dishes.forEach((dish) => {
+      // Atualiza a categoria sempre que encontrar um nameSection
+      if (dish.nameSection) {
+        currentCategory = dish.nameSection;
+      }
 
-  // Agrupa por categoria
-  const secoes = produtosFiltrados.reduce(
-    (acc, produto) => {
-      const cat = produto.category ?? 'Outros'
-      if (!acc[cat]) acc[cat] = []
-      acc[cat].push(produto)
-      return acc
-    },
-    {} as Record<string, Produto[]>
-  )
+      if (!groups[currentCategory]) {
+        groups[currentCategory] = [];
+      }
 
-  if (loading) {
+      // Filtro de busca
+      const matchesSearch = dish.nome.toLowerCase().includes(searchText.toLowerCase()) || 
+                            (dish.desc && dish.desc.toLowerCase().includes(searchText.toLowerCase()));
+
+      if (matchesSearch) {
+        groups[currentCategory].push(dish);
+      }
+    });
+
+    // Remove categorias que ficaram vazias após a busca
+    Object.keys(groups).forEach(key => {
+      if (groups[key].length === 0) delete groups[key];
+    });
+
+    return groups;
+  }, [dishes, searchText]);
+
+  // Tela de loading ou vazio caso não tenha itens
+  if (!dishes || dishes.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <p className="text-zinc-400">Carregando cardápio...</p>
+      <div className="pt-48 pb-20 flex justify-center items-center">
+        <p className="text-zinc-500">Nenhum produto encontrado no cardápio.</p>
       </div>
-    )
-  }
-
-  if (erro) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <p className="text-red-400">{erro}</p>
-      </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white mx-auto max-w-5xl px-4 pt-32 pb-16 sm:px-6 md:pt-40 lg:px-8 xl:pt-44">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {Object.entries(secoes).map(([categoria, itens]) => (
-          <div
-            key={categoria}
-            id={categoria.replace(/\s+/g, '-').toLowerCase()}
-            className="rounded-xl border border-zinc-200 p-4"
-          >
-            <h2 className="mb-3 text-lg font-bold text-orange-500">{categoria}</h2>
-            <Separator className="mb-4 bg-zinc-200" />
+    <main className="pt-48 pb-20 px-4 md:px-8 lg:px-12 xl:px-16 max-w-[1600px] mx-auto">
+      
+      {/* Container principal imitando a divisão em quadrantes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-zinc-200 bg-zinc-50/30 rounded-md overflow-hidden">
+        
+        {Object.entries(groupedDishes).map(([category, items], index) => {
+          // Lógica para as bordas ficarem parecidas com o print (linha dividindo no meio e embaixo)
+          const isEven = index % 2 === 0;
+          const isLastRow = index >= Object.keys(groupedDishes).length - 2;
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {itens.map((produto) => (
-                <button
-                  key={produto.id}
-                  type="button"
-                  onClick={() => addToBag({
-                    id: produto.id,
-                    nome: produto.name,
-                    valor: `R$ ${produto.price.toFixed(2)}`,
-                    imageSrc: produto.imageUrl,
-                    desc: produto.description,
-                  })}
-                  className="flex items-start gap-3 rounded-lg border border-zinc-200 p-3 text-left duration-300 hover:bg-zinc-50"
-                >
-                  {produto.imageUrl ? (
-                    <img
-                      src={produto.imageUrl}
-                      alt={produto.name}
-                      className="h-16 w-20 flex-shrink-0 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="h-16 w-20 flex-shrink-0 rounded-lg bg-zinc-100" />
-                  )}
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-xs font-bold text-zinc-900 sm:text-sm">
-                      {produto.name}
-                    </h3>
-                    {produto.description && (
-                      <p className="text-xs leading-tight text-zinc-500">
-                        {produto.description}
-                      </p>
-                    )}
-                    <p className="mt-1 text-xs text-zinc-400">
-                      A partir de: R$ {produto.price.toFixed(2)}
-                    </p>
+          return (
+            <div 
+              key={category} 
+              id={category.replace(/\s+/g, '-').toLowerCase()} // Para a navegação do SectionNav funcionar
+              className={`p-6 border-zinc-200 
+                ${isEven ? 'lg:border-r' : ''} 
+                ${!isLastRow ? 'border-b' : 'border-b lg:border-b-0'}
+              `}
+            >
+              {/* Título da Categoria */}
+              <h2 className="text-orange-500 font-bold text-xl mb-6">
+                {category}
+              </h2>
+
+              {/* Grid de produtos dentro da categoria */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {items.map((dish) => (
+                  <div 
+                    key={dish.id} 
+                    onClick={() => addToBag && addToBag(dish)} // Clique para adicionar ao carrinho
+                    className="flex bg-white border border-gray-100 rounded-lg overflow-hidden hover:shadow-md hover:border-orange-200 transition-all cursor-pointer h-32"
+                  >
+                    {/* Imagem */}
+                    <div className="w-[120px] h-full flex-shrink-0 bg-gray-100">
+                      <img 
+                        src={dish.imageSrc} 
+                        alt={dish.nome} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/120?text=Sem+Foto';
+                        }}
+                      />
+                    </div>
+
+                    {/* Conteúdo */}
+                    <div className="p-3 flex flex-col justify-between flex-grow">
+                      <div>
+                        <h3 className="text-[13px] font-bold text-gray-800 leading-tight mb-1">
+                          {dish.nome}
+                        </h3>
+                        <p className="text-[11px] text-gray-500 line-clamp-2 leading-snug">
+                          {dish.desc}
+                        </p>
+                      </div>
+                      <span className="text-[11px] font-medium text-gray-500 mt-2 block">
+                        {dish.valor}
+                      </span>
+                    </div>
                   </div>
-                </button>
-              ))}
+                ))}
+              </div>
+              
             </div>
-          </div>
-        ))}
+          );
+        })}
+        
       </div>
-    </div>
-  )
+    </main>
+  );
 }

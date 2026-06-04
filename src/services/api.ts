@@ -111,4 +111,31 @@ export const orderAPI = {
     orderApi.put(`/orders/status/${id}`, null, { params: { newStatus } }),
 }
 
+// Tipagens espelhando exatamente os DTOs do Java
+export interface OrderItemRequest {
+  productId: string; // UUID
+  amount: number;
+}
+
+export interface OrderRequest {
+  items: OrderItemRequest[];
+}
+
+// Função para disparar o POST
+export async function submitOrder(orderData: OrderRequest) {
+  const response = await fetch('/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orderData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Falha ao processar o pedido.');
+  }
+
+  return response.json();
+}
+
 export default authApi;
